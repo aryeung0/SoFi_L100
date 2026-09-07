@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="snowflake-source" content="cortex-agent-authored">
+<title>SoFi Finance AI Champions — Level 100 Hands-On Guide</title>
+<script type="application/json" id="snowflake-report-metadata">
+{
+  "generated": "2026-09-06",
+  "intent": "Styled participant guide (Xactly on-site lab template adapted) for the SoFi Finance AI Champions Level 100 workshop",
+  "sections": [
+    { "id": "slides", "title": "Slide Reference" },
+    { "id": "overview", "title": "What This Workshop Builds" },
+    { "id": "architecture", "title": "Solution Architecture" },
+    { "id": "features", "title": "Snowflake Features in Action" },
+    { "id": "objects", "title": "What the Setup Script Creates" },
+    { "id": "setup", "title": "Step 1 — Environment Setup" },
+    { "id": "tour", "title": "Step 2 — Snowsight Tour" },
+    { "id": "walkthrough", "title": "Step 3 — AI Assistants: CoCo & CoWork" },
+    { "id": "next-steps", "title": "Recap & What's Next" }
+  ]
+}
+</script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { color-scheme: light dark; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: light-dark(#16222c, #dbe6ee);
+    background: light-dark(hsl(201, 25%, 97%), hsl(205, 30%, 9%));
+    line-height: 1.6;
+}
+
+/* ── Snowflake Brand Tokens ──
+   Snowflake Blue:  #29B5E8
+   Blue Dark:       #0E6BA8
+   Navy:            #0A1F33
+   Navy 2:          #12314F
+   Accent (star):   #7A5CFA (violet, used sparingly for agent/AI accents)
+*/
+
+/* Header */
+.header {
+    background: linear-gradient(90deg, #00A2C7 0%, #3FBBDA 42%, #DFF4FA 78%, #ffffff 100%);
+    color: white; padding: 22px 40px 20px; position: relative; overflow: hidden;
+}
+.header::before {
+    content: ''; position: absolute; top: -50%; right: 18%; width: 460px; height: 460px;
+    background: radial-gradient(circle, rgba(255,255,255,0.20) 0%, transparent 70%); border-radius: 50%;
+}
+.header::after {
+    content: ''; position: absolute; bottom: -30%; left: -5%; width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%); border-radius: 50%;
+}
+.header h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; position: relative; letter-spacing: -0.01em; }
+.header .subtitle { font-size: 15px; color: #eafcff; margin-bottom: 6px; position: relative; }
+.header .project-label { font-size: 13px; color: hsl(195, 60%, 92%); margin-bottom: 12px; position: relative; }
+.header .chips { display: flex; gap: 10px; flex-wrap: nowrap; position: relative; }
+.header .chip { background: #00A2C7; padding: 4px 12px; border-radius: 6px; font-size: 13px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.25); }
+
+/* Brand lockup (top-right) */
+.brand-lockup { position: absolute; top: 18px; right: 32px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 2; }
+.brand-lockup img { display: block; border-radius: 5px; box-shadow: 0 1px 4px rgba(10,31,51,0.18); }
+.brand-lockup .logo-sofi { height: 22px; width: auto; }
+.brand-lockup .logo-snowflake { height: 22px; width: auto; }
+@media (max-width: 720px) {
+    .brand-lockup { position: static; align-items: flex-start; margin-top: 14px; }
+}
+
+/* Nav */
+.nav-bar {
+    background: light-dark(#fff, #101b26); border-bottom: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,20%));
+    padding: 0 44px; position: sticky; top: 0; z-index: 100;
+    display: flex; gap: 0; overflow-x: auto;
+}
+.nav-bar a {
+    text-decoration: none; color: light-dark(hsl(201,15%,44%), hsl(201,15%,65%)); font-size: 13.5px; font-weight: 500;
+    padding: 12px 16px; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s;
+}
+.nav-bar a:hover { color: light-dark(#0A1F33, #dbe6ee); }
+.nav-bar a.active { color: #0E6BA8; border-bottom-color: #29B5E8; }
+
+/* Content */
+.content { max-width: 1160px; margin: 0 auto; padding: 0 clamp(16px,4vw,32px) 48px; }
+.section { margin-bottom: 52px; scroll-margin-top: 58px; }
+.section h2 { font-size: 24px; font-weight: 700; color: light-dark(#0A1F33, #eaf3f8); border-bottom: 3px solid #29B5E8; padding-bottom: 8px; margin-bottom: 20px; letter-spacing: -0.01em; }
+.section h3 { font-size: 19px; font-weight: 600; color: light-dark(hsl(201,15%,15%), hsl(201,15%,88%)); margin: 24px 0 10px; }
+.section p { font-size: 16px; color: light-dark(hsl(201,15%,40%), hsl(201,15%,68%)); margin-bottom: 14px; max-width: 900px; }
+
+/* Slide gallery */
+.slide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.slide-card { border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); border-radius: 10px; overflow: hidden; background: light-dark(#fff, #16222c); cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.slide-card:hover { border-color: #29B5E8; }
+.slide-card.active { border-color: #29B5E8; box-shadow: 0 0 0 2px rgba(41,181,232,0.25); }
+.slide-card img { display: block; width: 100%; }
+.slide-card .cap { font-size: 12px; color: light-dark(hsl(201,15%,44%), hsl(201,15%,65%)); padding: 7px 10px; border-top: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); }
+
+.slide-expand { margin-top: 16px; border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); border-radius: 10px; background: light-dark(hsl(201,20%,97%), hsl(205,20%,13%)); padding: 20px; text-align: center; position: relative; }
+.slide-expand img { max-width: 630px; width: 100%; border-radius: 8px; border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,26%)); }
+.slide-expand-cap { margin-top: 12px; font-size: 14px; font-weight: 600; color: light-dark(hsl(201,15%,30%), hsl(201,15%,80%)); }
+.slide-expand-close { position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: light-dark(hsl(201,15%,44%), hsl(201,15%,65%)); padding: 4px 8px; }
+.slide-expand-close:hover { color: light-dark(#0A1F33, #eaf3f8); }
+
+/* Metrics */
+.metrics-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; }
+.metric-card { background: light-dark(#fff, #16222c); border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); border-radius: 10px; padding: 18px 22px; flex: 1; min-width: 170px; }
+.metric-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: light-dark(hsl(201,15%,44%), hsl(201,15%,65%)); margin-bottom: 2px; font-weight: 600; }
+.metric-value { font-size: 26px; font-weight: 800; color: light-dark(#0A1F33, #eaf3f8); }
+.metric-sub { font-size: 13px; color: light-dark(hsl(201,15%,57%), hsl(201,15%,58%)); margin-top: 2px; }
+
+/* CSS architecture diagram (mermaid-free) */
+.diagram { background: light-dark(#fff, #101b26); border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); border-radius: 10px; padding: 26px 20px; overflow-x: auto; }
+.diagram-row { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; min-width: 780px; justify-content: center; }
+.diagram-node { border-radius: 8px; padding: 12px 16px; font-size: 13px; font-weight: 600; text-align: center; min-width: 140px; border: 2px solid; }
+.diagram-node small { display: block; font-weight: 400; font-size: 11.5px; margin-top: 3px; opacity: .85; }
+.dn-source { background: hsl(202,60%,94%); border-color: #29B5E8; color: #0A1F33; }
+.dn-foundation { background: #eafbf1; border-color: #2fa86a; color: #14532d; }
+.dn-semantic { background: #f2eefe; border-color: #7A5CFA; color: #3d2a8f; }
+.dn-consume { background: #fef4e6; border-color: #e8912a; color: #7a4a10; }
+.diagram-arrow { font-size: 20px; color: light-dark(hsl(201,15%,55%), hsl(201,15%,55%)); flex-shrink: 0; }
+.diagram-caption { font-size: 14px; color: light-dark(hsl(201,15%,44%), hsl(201,15%,65%)); margin-top: 12px; text-align: center; }
+
+/* Feature rows (one per row, expand to the right) */
+.features-layout { display: flex; gap: 16px; align-items: flex-start; }
+.feature-rows { flex: 0 0 280px; display: flex; flex-direction: column; gap: 8px; }
+.feature-row {
+    display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+    border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); border-left: 4px solid transparent;
+    border-radius: 8px; padding: 12px 14px; background: light-dark(#fff, #16222c);
+    font-family: inherit; font-size: 14.5px; font-weight: 600; color: light-dark(hsl(201,15%,30%), hsl(201,15%,80%));
+    cursor: pointer; transition: background .15s, border-color .15s;
+}
+.feature-row .num { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #29B5E8; color: white; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.feature-row .row-arrow { margin-left: auto; font-size: 15px; color: light-dark(hsl(201,15%,60%), hsl(201,15%,55%)); transition: transform .2s; flex-shrink: 0; }
+.feature-row:hover { background: light-dark(hsl(201,20%,97%), hsl(205,20%,14%)); }
+.feature-row.active .row-arrow { transform: translateX(3px); }
+.feature-row[data-feature="data"].active { border-left-color: #0E6BA8; background: hsl(202,45%,95%); }
+.feature-row[data-feature="semantic"].active { border-left-color: #7A5CFA; background: #f2eefe; }
+.feature-row[data-feature="coco"].active { border-left-color: #29B5E8; background: hsl(202,45%,95%); }
+.feature-row[data-feature="cowork"].active { border-left-color: #e8912a; background: #fef4e6; }
+.feature-detail-panel {
+    flex: 1; min-width: 0; min-height: 260px;
+    border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); border-radius: 10px;
+    background: light-dark(#fff, #16222c); padding: 22px 24px; position: relative;
+}
+.feature-detail { display: none; font-size: 14.5px; color: light-dark(hsl(201,15%,42%), hsl(201,15%,68%)); line-height: 1.7; }
+.feature-detail.active { display: block; }
+.feature-detail h4 { font-size: 17px; font-weight: 700; color: light-dark(#0A1F33, #eaf3f8); margin-bottom: 10px; }
+.feature-detail .tag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.feature-detail[data-feature="data"] .tag { background: hsl(202,45%,88%); color: #0E2A4A; }
+.feature-detail[data-feature="semantic"] .tag { background: #e4daff; color: #3d2a8f; }
+.feature-detail[data-feature="coco"] .tag { background: hsl(202,45%,88%); color: #0A1F33; }
+.feature-detail[data-feature="cowork"] .tag { background: #fbe1bd; color: #7a4a10; }
+@media (max-width: 680px) {
+    .features-layout { flex-direction: column; }
+    .feature-rows { flex: 1 1 auto; width: 100%; }
+}
+
+/* Notes */
+.note, .note-green, .note-amber { padding: 14px 18px; border-radius: 0 8px 8px 0; font-size: 15px; margin-bottom: 20px; }
+.note { background: light-dark(hsl(202,45%,95%), hsl(205,40%,14%)); border-left: 4px solid #29B5E8; color: light-dark(#0E4E68, #bfe6f6); }
+.note-green { background: light-dark(#f0fdf4, hsl(150,35%,12%)); border-left: 4px solid #22c55e; color: light-dark(#166534, #a9e6c3); }
+.note-amber { background: light-dark(#fef4e6, hsl(30,45%,12%)); border-left: 4px solid #e8912a; color: light-dark(#7a4a10, #f0c98a); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 15px; }
+th { background: light-dark(hsl(201,20%,93%), hsl(205,20%,16%)); font-weight: 600; text-align: left; padding: 10px 14px; border-bottom: 2px solid light-dark(hsl(201,20%,88%), hsl(205,20%,24%)); }
+td { padding: 9px 14px; border-bottom: 1px solid light-dark(hsl(201,20%,93%), hsl(205,20%,18%)); }
+tr:hover td { background: light-dark(hsl(201,20%,97%), hsl(205,20%,14%)); }
+tr.sub-row td:first-child { padding-left: 30px; font-weight: 400; }
+tr.sub-row-2 td:first-child { padding-left: 54px; font-weight: 400; font-size: 14px; }
+
+/* By the numbers table uses .table-wrap / table styles above */
+
+/* Stop cards */
+.stop { border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); border-radius: 10px; padding: 22px 26px; margin: 18px 0; background: light-dark(#fff, #16222c); }
+.stop-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.stop-num { background: #29B5E8; color: #04202b; font-weight: 700; font-size: 14px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stop-title { font-size: 17px; font-weight: 600; color: light-dark(#0A1F33, #eaf3f8); }
+.stop-tag { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.tag-coco { background: hsl(202,45%,92%); color: #0E6BA8; }
+.tag-cowork { background: #fef4e6; color: #b5651d; }
+.tag-setup { background: #eafbf1; color: #15803d; }
+.stop img { max-width: 60%; border-radius: 8px; border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,26%)); margin-top: 10px; }
+.stop img[src$="11_CoCo.png"] { max-width: 37.5%; }
+.stop img[src$="00_Projects_Workspaces.png"],
+.stop img[src$="06_Horizon_Catalog.png"],
+.stop img[src$="09_Database_view.png"],
+.stop img[src$="12_Cowork.png"] { max-width: 45%; }
+
+/* Prompt lists (embedded within Live Session Walkthrough stops) */
+.prompt-text-label { margin-top: 14px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.8px; color: light-dark(hsl(201,15%,44%), hsl(201,15%,65%)); font-weight: 700; }
+.prompt-lines { background: #0A1F33; color: hsl(201,25%,88%); padding: 14px 18px; border-radius: 8px; margin-top: 6px; font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.9; }
+.prompt-lines .ln { display: flex; align-items: baseline; gap: 10px; padding: 3px 0; }
+.prompt-lines .ln .bullet { color: #29B5E8; flex-shrink: 0; }
+
+
+/* Footer */
+.footer { text-align: center; padding: 24px; font-size: 14px; color: light-dark(hsl(201,15%,57%), hsl(201,15%,55%)); border-top: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,22%)); margin-top: 40px; }
+
+img { max-width: 100%; height: auto; }
+
+@media print {
+    .nav-bar { display: none; }
+    .feature-detail { display: block !important; }
+    .section { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Level 100 &mdash; Hands-On Guide</h1>
+    <div class="subtitle">SoFi Finance AI Champions Workshop &mdash; Self-Service Setup</div>
+    <div class="project-label">Snowflake Solutions Engineering &mdash; Hands-On Session Playbook</div>
+    <div class="chips">
+        <span class="chip"><strong>Program:</strong> SoFi Finance AI Champions</span>
+        <span class="chip"><strong>Facilitator:</strong> Arnold Yeung, Snowflake SE</span>
+        <span class="chip"><strong>Tools:</strong> CoCo + CoWork</span>
+    </div>
+    <div class="brand-lockup">
+        <img class="logo-sofi" src="logos/sofi_logo.png" alt="SoFi logo">
+        <img class="logo-snowflake" src="logos/snowflake_logo.png" alt="Snowflake logo">
+    </div>
+</div>
+
+<div class="nav-bar" id="navbar">
+    <a href="#slides">Slides</a>
+    <a href="#overview">Overview</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#features">Features</a>
+    <a href="#objects">What Gets Created</a>
+    <a href="#setup">Setup</a>
+    <a href="#tour">Tour</a>
+    <a href="#walkthrough">AI Assistants</a>
+    <a href="#next-steps">Recap &amp; Next Steps</a>
+</div>
+
+<div class="content">
+
+<div class="section" id="slides">
+    <h2>Slide Reference</h2>
+    <p>A copy of the slides your facilitator presents at the start of the session, for reference during or after the workshop.</p>
+    <div class="slide-grid">
+        <div class="slide-card"><img src="slide_images/slide_01_title.png" alt="Slide 1: Title"><div class="cap">1 &middot; Title</div></div>
+        <div class="slide-card"><img src="slide_images/slide_02_instructors.png" alt="Slide 2: Instructors"><div class="cap">2 &middot; Instructors</div></div>
+        <div class="slide-card"><img src="slide_images/slide_03_agenda.png" alt="Slide 3: Agenda"><div class="cap">3 &middot; Agenda</div></div>
+        <div class="slide-card"><img src="slide_images/slide_04_why_snowflake.png" alt="Slide 4: Why Snowflake"><div class="cap">4 &middot; Why Snowflake</div></div>
+        <div class="slide-card"><img src="slide_images/slide_05_key_terms.png" alt="Slide 5: Key Terms"><div class="cap">5 &middot; Key Terms</div></div>
+        <div class="slide-card"><img src="slide_images/slide_06_coco.png" alt="Slide 6: CoCo"><div class="cap">6 &middot; CoCo</div></div>
+        <div class="slide-card"><img src="slide_images/slide_07_cortex_analyst_cowork.png" alt="Slide 7: Cortex Agent and CoWork"><div class="cap">7 &middot; Cortex Agent &amp; CoWork</div></div>
+        <div class="slide-card"><img src="slide_images/slide_08_when_to_use.png" alt="Slide 8: When to Use What"><div class="cap">8 &middot; When to Use What</div></div>
+        <div class="slide-card"><img src="slide_images/slide_09_l200_preview.png" alt="Slide 9: Level 200 Preview"><div class="cap">9 &middot; Level 200 Preview</div></div>
+        <div class="slide-card"><img src="slide_images/slide_10_resources.png" alt="Slide 10: Resources"><div class="cap">10 &middot; Resources</div></div>
+    </div>
+    <div class="slide-expand" id="slideExpand" hidden>
+        <button class="slide-expand-close" id="slideExpandClose" aria-label="Close expanded slide">&times;</button>
+        <img id="slideExpandImg" src="" alt="">
+        <div class="slide-expand-cap" id="slideExpandCap"></div>
+    </div>
+</div>
+
+<div class="section" id="overview">
+    <h2>What This Workshop Builds</h2>
+    <p>In this session you'll set up a small but complete Snowflake-native finance analytics environment, then experience it from two different AI vantage points: <strong>CoCo</strong>, a coding agent for hands-on exploration, and <strong>CoWork</strong>, a conversational research assistant grounded in governed business definitions.</p>
+    <p>The environment has three layers: a curated <strong>data foundation</strong> (6 tables covering invoices, vendors, loans, products, and competitor earnings), an <strong>intelligence layer</strong> (a Semantic View grounding a Cortex Agent), and a <strong>consumption layer</strong> where you interact through CoCo and CoWork.</p>
+
+    <div class="metrics-row">
+        <div class="metric-card"><div class="metric-label">Approach</div><div class="metric-value">3-Layer</div><div class="metric-sub">Data + Semantic View + AI Agent</div></div>
+        <div class="metric-card"><div class="metric-label">Setup</div><div class="metric-value">1 Script</div><div class="metric-sub">One SQL file, ~2 minutes to run</div></div>
+        <div class="metric-card"><div class="metric-label">Infrastructure</div><div class="metric-value">Zero-external</div><div class="metric-sub">100% Snowflake &mdash; no data leaves the platform</div></div>
+        <div class="metric-card"><div class="metric-label">Isolation</div><div class="metric-value">Per-attendee</div><div class="metric-sub">Own trial account, own role and warehouse</div></div>
+    </div>
+
+    <div class="note">
+        <strong>Prerequisites:</strong> A Snowflake trial account (credentials in your welcome email), Chrome or Edge, and no prior SQL or coding experience required.
+    </div>
+</div>
+
+<div class="section" id="architecture">
+    <h2>Solution Architecture</h2>
+    <p>One setup script builds the data foundation and the semantic layer. From there, CoCo and CoWork give you two different ways to interact with the same governed data.</p>
+
+    <div class="diagram">
+        <div class="diagram-row">
+            <div class="diagram-node dn-source">Setup Script<small>00_L100_Setup.sql</small></div>
+            <div class="diagram-arrow">&rarr;</div>
+            <div class="diagram-node dn-foundation">6 Base Tables<small>Invoices, Vendors, Loans,<br>Products, Earnings</small></div>
+            <div class="diagram-arrow">&rarr;</div>
+            <div class="diagram-node dn-semantic">Semantic View<small>FINANCE_ANALYTICS</small></div>
+            <div class="diagram-arrow">&rarr;</div>
+            <div class="diagram-node dn-consume">CoCo + CoWork<small>Explore &amp; Ask</small></div>
+        </div>
+        <div class="diagram-caption">Each attendee builds this entire stack in their own trial account using one setup script.</div>
+    </div>
+</div>
+
+<div class="section" id="features">
+    <h2>Snowflake Features in Action</h2>
+    <p>Each layer of the environment maps to a specific Snowflake capability. Click a row to see the details.</p>
+
+    <div class="features-layout">
+        <div class="feature-rows">
+            <button class="feature-row active" data-feature="data">
+                <span class="num">1</span> Data Model &amp; Governance
+                <span class="row-arrow">&rsaquo;</span>
+            </button>
+            <button class="feature-row" data-feature="semantic">
+                <span class="num">2</span> Semantic View &amp; Cortex Agent
+                <span class="row-arrow">&rsaquo;</span>
+            </button>
+            <button class="feature-row" data-feature="coco">
+                <span class="num">3</span> CoCo (Cortex Code)
+                <span class="row-arrow">&rsaquo;</span>
+            </button>
+            <button class="feature-row" data-feature="cowork">
+                <span class="num">4</span> CoWork (Snowflake Intelligence)
+                <span class="row-arrow">&rsaquo;</span>
+            </button>
+        </div>
+
+        <div class="feature-detail-panel">
+            <div class="feature-detail active" data-feature="data">
+                <span class="tag">Data Foundation</span>
+                <h4>Data Model &amp; Governance</h4>
+                <p><strong>6 tables</strong> store the complete finance dataset: PRODUCTS, EARNINGS_TRANSCRIPTS (covering Coinbase, Robinhood, LendingClub, Marqeta), INVOICES, VENDOR_CATALOG, LOAN_ORIGINATIONS, and LOAN_PERFORMANCE.</p>
+                <p>Every table carries <strong>tags</strong> (domain, source_system, data_sensitivity, refresh_frequency) and <strong>contacts</strong> (Steward, Support, Security &amp; Compliance) &mdash; all visible in the Horizon Catalog's Database Explorer.</p>
+            </div>
+            <div class="feature-detail" data-feature="semantic">
+                <span class="tag">Governed Analytics</span>
+                <h4>Semantic View &amp; Cortex Agent</h4>
+                <p>The <strong>FINANCE_ANALYTICS</strong> semantic view defines the business vocabulary for this dataset &mdash; dimensions, facts, metrics, and relationships across all 6 tables, plus verified queries that ground common questions.</p>
+                <p>The <strong>Cortex Agent</strong> uses this semantic view to translate natural language into governed SQL &mdash; every user gets the same definition of "revenue," "overdue," and "delinquency."</p>
+            </div>
+            <div class="feature-detail" data-feature="coco">
+                <span class="tag">Build &amp; Explore</span>
+                <h4>CoCo (Cortex Code)</h4>
+                <p>CoCo is an AI coding agent embedded directly in your Snowsight Workspace. It reads your schema, writes and runs SQL from plain English, and remembers conversational context across follow-ups.</p>
+                <p>It's trained on official Snowflake documentation and has access to coding skills built by Snowflake's product teams &mdash; so the SQL it writes is tuned specifically for Snowflake, not generic guesses. CoCo assumes some SQL/technical comfort.</p>
+                <p>Today you're using CoCo inside Snowsight Workspaces, but it's also available as a <strong>CLI</strong> and a <strong>Desktop app</strong> &mdash; so you can bring the same AI coding partner into your terminal or IDE.</p>
+            </div>
+            <div class="feature-detail" data-feature="cowork">
+                <span class="tag">Conversational AI</span>
+                <h4>CoWork (Snowflake Intelligence)</h4>
+                <p>CoWork is a conversational research assistant backed by the <strong>Finance Assistant</strong> agent, which wraps the FINANCE_ANALYTICS semantic view via a <code>cortex_analyst_text_to_sql</code> tool plus a <code>data_to_chart</code> tool for visualizations. It's built for non-technical stakeholders who just want an answer.</p>
+                <p>Results can be saved as <strong>Artifacts</strong> and shared with colleagues, and repeatable questions can be scheduled as <strong>Automations</strong> that deliver fresh answers on a cadence.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section" id="objects">
+    <h2>What the Setup Script Creates</h2>
+    <p>Running <code>00_L100_Setup.sql</code> once builds your entire environment &mdash; infrastructure, data, semantic view, and AI agent &mdash; and loads it with a realistic finance dataset.</p>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Object</th><th>Name / Count</th><th>What It Is</th></tr>
+            <tr><td><strong>Role</strong></td><td><code>FINANCE_HOL_ADMIN</code></td><td>Your permissions for the workshop</td></tr>
+            <tr><td><strong>Warehouse</strong></td><td><code>FINANCE_HOL_WH</code></td><td>Compute engine for your queries (auto-suspends when idle)</td></tr>
+            <tr><td><strong>Database</strong></td><td><code>SOFI_FINANCE_HOL</code></td><td>Top-level container for all workshop data</td></tr>
+            <tr class="sub-row"><td>Schema</td><td><code>FINANCIAL</code></td><td>Holds the 6 tables below</td></tr>
+            <tr class="sub-row"><td>Tables</td><td>6</td><td>The base tables that make up the FINANCIAL schema</td></tr>
+            <tr class="sub-row-2"><td>Products</td><td>12 rows</td><td>Product data table &mdash; the financial products SoFi and its competitors offer</td></tr>
+            <tr class="sub-row-2"><td>Earnings Transcripts</td><td>16 rows</td><td>Earnings transcripts data table &mdash; competitor earnings call text for Coinbase, Robinhood, LendingClub, and Marqeta</td></tr>
+            <tr class="sub-row-2"><td>Invoices</td><td>500 rows</td><td>Invoices data table &mdash; vendor billing records used for overdue and spend analysis</td></tr>
+            <tr class="sub-row-2"><td>Vendors</td><td>20 rows</td><td>Vendor catalog data table &mdash; the vendor master list invoices roll up to</td></tr>
+            <tr class="sub-row-2"><td>Loan Originations</td><td>652 rows</td><td>Loan originations data table &mdash; new loans issued, by product and quarter</td></tr>
+            <tr class="sub-row-2"><td>Loan Performance Rows</td><td>900 rows</td><td>Loan performance data table &mdash; delinquency and repayment tracking over time</td></tr>
+            <tr><td><strong>Semantic View</strong></td><td><code>FINANCE_ANALYTICS</code></td><td>Governed business definitions layer used by the Cortex Agent, spanning all 6 tables</td></tr>
+            <tr><td><strong>Agent</strong></td><td><code>FINANCE_ASSISTANT</code></td><td>The AI agent CoWork uses to answer your questions</td></tr>
+            <tr><td><strong>Compliance and Domain Tags</strong></td><td>steward, support, etc.</td><td>Governance metadata readily available in the Horizon Catalog</td></tr>
+        </table>
+    </div>
+    <div class="note-amber">
+        <strong>Isolation model:</strong> each attendee runs the script in their own trial account, so nothing is shared between participants &mdash; every object lives entirely inside your own <code>SOFI_FINANCE_HOL</code> database.
+    </div>
+</div>
+
+<div class="section" id="setup">
+    <h2>Step 1 &mdash; Environment Setup</h2>
+    <p>Your facilitator walks through this live. It takes about 2 minutes end to end.</p>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">1</span><span class="stop-title">Create a Workspace</span><span class="stop-tag tag-setup">Setup</span></div>
+        <p>Download <code>00_L100_Setup.sql</code> from the link your facilitator shares. In the left sidebar, click <strong>Projects &rarr; Workspaces</strong>, then click <strong>+</strong> and select <strong>Create workspace</strong>. Name it <strong>SoFi_L100</strong>.</p>
+        <img src="screenshots/00_Projects_Workspaces.png" alt="Projects and Workspaces navigation">
+        <img src="screenshots/01_create_workspace.png" alt="Create workspace dialog">
+    </div>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">2</span><span class="stop-title">Upload &amp; Run the Script</span><span class="stop-tag tag-setup">Setup</span></div>
+        <p>Click <strong>+ Add new &rarr; Upload files</strong> and select <code>00_L100_Setup.sql</code>. Open it, click the dropdown arrow next to the play button, and choose <strong>Run all</strong>. Wait about 2 minutes &mdash; the final query shows a 13-object verification table.</p>
+        <img src="screenshots/03_Run_All.png" alt="Run all dropdown">
+        <img src="screenshots/04_completed_run.png" alt="Completed run verification table">
+    </div>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">3</span><span class="stop-title">Switch Your Role</span><span class="stop-tag tag-setup">Setup</span></div>
+        <p>Click your <strong>user avatar</strong> in the bottom-left corner. Under <strong>Switch Role</strong>, select <strong>FINANCE_HOL_ADMIN</strong> and confirm. This ensures CoCo and CoWork use the right permissions.</p>
+        <img src="screenshots/05_switch_roles.png" alt="Switch role menu">
+    </div>
+</div>
+
+<div class="section" id="tour">
+    <h2>Step 2 &mdash; Snowsight Tour</h2>
+    <p>Before jumping into AI tools, take a quick look at the data environment you just created.</p>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">1</span><span class="stop-title">Horizon Catalog</span><span class="stop-tag tag-setup">Tour</span></div>
+        <p>In the left sidebar under <strong>Horizon Catalog</strong>, click <strong>Catalog &rarr; Database Explorer</strong>.</p>
+        <img src="screenshots/06_Horizon_Catalog.png" alt="Horizon Catalog navigation">
+    </div>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">2</span><span class="stop-title">Table Details &amp; Governance</span><span class="stop-tag tag-setup">Tour</span></div>
+        <p>Click into <strong>SOFI_FINANCE_HOL &rarr; FINANCIAL</strong> and open any table (try <strong>LOAN_ORIGINATIONS</strong>). The <strong>Table Details</strong> tab shows the description and the assigned Steward, Support, and Security &amp; Compliance contacts.</p>
+        <img src="screenshots/07_Table_Description.png" alt="Table details with description and contacts">
+    </div>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">3</span><span class="stop-title">Lineage</span><span class="stop-tag tag-setup">Tour</span></div>
+        <p>Click the <strong>Lineage</strong> tab to see how the table connects to the <strong>FINANCE_ANALYTICS</strong> semantic view &mdash; this is how Snowflake tracks data dependencies end to end.</p>
+        <img src="screenshots/08_Lineage.png" alt="Lineage view">
+    </div>
+</div>
+
+<div class="section" id="walkthrough">
+    <h2>Step 3 &mdash; AI Assistants: CoCo &amp; CoWork</h2>
+    <p>Your environment is built and you've toured the catalog &mdash; now put it to work with the two AI tools you'll use most. Ask CoCo to explore and query your data directly, then ask CoWork the same kinds of questions in plain English. Copy any of the sample prompts below into CoCo or CoWork as-is, or use them as a starting point for your own questions.</p>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">1</span><span class="stop-title">CoCo &mdash; Explore the Schema</span><span class="stop-tag tag-coco">CoCo</span></div>
+        <p>Back in your Workspace, notice the <strong>Databases</strong> tab &mdash; you can browse tables right there too. Click the <strong>blue star icon</strong> to open CoCo and ask your first question.</p>
+        <img src="screenshots/09_Database_view.png" alt="Databases tab in workspace">
+        <img src="screenshots/10_coco_bluesquare.png" alt="CoCo blue star icon">
+        <div class="prompt-text-label">Explore your data</div>
+        <div class="prompt-lines">
+            <div class="ln"><span class="bullet">&rsaquo;</span>What databases and tables are available to me?</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Show me a sample of the earnings transcript data</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>What columns are in the invoices table?</div>
+        </div>
+    </div>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">2</span><span class="stop-title">CoCo &mdash; Ask &amp; Iterate</span><span class="stop-tag tag-coco">CoCo</span></div>
+        <p>Type a question in the chat panel. CoCo writes the SQL, runs it, and shows results &mdash; then keeps context for follow-ups like "now break that down by department."</p>
+        <img src="screenshots/11_CoCo.png" alt="CoCo chat panel">
+        <div class="note-green" style="margin-top:14px;"><strong>Pro tip:</strong> You can type your next prompt while CoCo is still working &mdash; it queues and auto-sends when ready.</div>
+        <div class="prompt-text-label">Ask business questions</div>
+        <div class="prompt-lines">
+            <div class="ln"><span class="bullet">&rsaquo;</span>Which companies had the highest revenue growth year-over-year?</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>What's our total overdue invoice exposure by vendor?</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Show me loan origination trends for personal loans in 2026</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Which products have the highest 90+ day delinquency rate?</div>
+        </div>
+        <div class="prompt-text-label">Iterate with follow-ups</div>
+        <div class="prompt-lines">
+            <div class="ln"><span class="bullet">&rsaquo;</span>Now break that down by department</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Which quarter had the biggest change?</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Export this as a CSV</div>
+        </div>
+    </div>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">3</span><span class="stop-title">CoWork &mdash; Ask, Chart &amp; Save</span><span class="stop-tag tag-cowork">CoWork</span></div>
+        <p>Click <strong>AI &amp; ML &rarr; Snowflake CoWork</strong>. The Finance Assistant agent is already loaded since it's the only agent on the account &mdash; just start typing. CoWork routes your question through the Finance Assistant Cortex Agent, which queries the FINANCE_ANALYTICS semantic view.</p>
+        <img src="screenshots/12_Cowork.png" alt="AI and ML sidebar with Snowflake CoWork">
+        <img src="screenshots/13_CoWork_UI.png" alt="CoWork landing page">
+        <div class="prompt-text-label">Data questions</div>
+        <div class="prompt-lines">
+            <div class="ln"><span class="bullet">&rsaquo;</span>What was Coinbase's revenue in Q1 2026?</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Compare revenue across all companies for the last 4 quarters</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>How many invoices are overdue and what's the total amount?</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Which vendors have the highest spend relative to their budget?</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>What are the key themes from Robinhood's most recent earnings call?</div>
+        </div>
+        <p style="margin-top:16px;">Ask for a chart directly &mdash; no exporting to Excel. Save any result you like as an <strong>Artifact</strong> and share it with a colleague, or set up an <strong>Automation</strong> to have CoWork deliver a recurring answer on a schedule.</p>
+        <div class="prompt-text-label">Charts and visualizations</div>
+        <div class="prompt-lines">
+            <div class="ln"><span class="bullet">&rsaquo;</span>Show me quarterly revenue by company as a chart</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Show me the delinquency rate trend for personal loans &mdash; as a chart</div>
+            <div class="ln"><span class="bullet">&rsaquo;</span>Chart invoice volume by month</div>
+        </div>
+        <div class="prompt-text-label">Multi-turn research workflow</div>
+        <div class="prompt-lines">
+            <div class="ln"><span class="bullet">1.</span>What are our top 5 vendors by spend?</div>
+            <div class="ln"><span class="bullet">2.</span>Which of those have overdue invoices?</div>
+            <div class="ln"><span class="bullet">3.</span>Draft a one-paragraph summary of the overdue exposure I can share with my manager</div>
+        </div>
+    </div>
+</div>
+
+<div class="section" id="next-steps">
+    <h2>Recap &amp; What's Next</h2>
+    <p>Today you were the <strong>consumer</strong>: you stood up a governed finance data foundation with one script, then explored it through two AI vantage points &mdash; <strong>CoCo</strong> for hands-on SQL exploration, and <strong>CoWork</strong> for conversational, chart-ready answers grounded in a Semantic View and Cortex Agent that were already built for you.</p>
+    <p>The Finance AI Champions series continues in two more sessions, each going deeper for a more targeted audience.</p>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Level</th><th>Focus</th><th>What You'll Do</th></tr>
+            <tr><td><strong>Level 100</strong><br><span style="font-size:12.5px; color:light-dark(hsl(201,15%,55%),hsl(201,15%,60%));">Today</span></td><td>Platform orientation &amp; Cortex AI as a consumer</td><td>Tour Snowsight and governance, then use CoCo and CoWork against a pre-built finance dataset</td></tr>
+            <tr><td><strong>Level 200</strong></td><td>Document intelligence &amp; AI Functions</td><td>Use CoCo to build with AI_EXTRACT, AI_CLASSIFY, AI_SENTIMENT, and AI_EMBED + Cortex Search &mdash; parsing PDFs, classifying documents, and building a searchable knowledge base from earnings transcripts</td></tr>
+            <tr><td><strong>Level 300</strong></td><td>Agents &amp; advanced workflows</td><td>Build your own Semantic View and Cortex Agent from scratch, then explore multi-agent orchestration and advanced CoCo development workflows</td></tr>
+        </table>
+    </div>
+
+    <div class="note-green">
+        <strong>Bottom line:</strong> Level 100 showed what a well-configured AI stack feels like to use. Level 200 builds the AI Functions layer on top of your data, and Level 300 shows how to wire up the Semantic View and Cortex Agent you used today &mdash; entirely inside Snowflake.
+    </div>
+</div>
+
+</div>
+
+<div class="footer">
+    Snowflake Solutions Engineering &mdash; SoFi Finance AI Champions Workshop &mdash; Level 100 Hands-On Guide
+</div>
+
+<script>
+// Slide gallery — click a thumbnail to expand a larger version below the grid
+var slideCards = Array.prototype.slice.call(document.querySelectorAll('.slide-card'));
+var slideExpand = document.getElementById('slideExpand');
+var slideExpandImg = document.getElementById('slideExpandImg');
+var slideExpandCap = document.getElementById('slideExpandCap');
+slideCards.forEach(function (card) {
+    card.addEventListener('click', function () {
+        var img = card.querySelector('img');
+        var cap = card.querySelector('.cap').textContent;
+        if (card.classList.contains('active')) {
+            slideExpand.hidden = true;
+            card.classList.remove('active');
+            return;
+        }
+        slideExpandImg.src = img.src;
+        slideExpandImg.alt = img.alt;
+        slideExpandCap.textContent = cap;
+        slideExpand.hidden = false;
+        slideCards.forEach(function (c) { c.classList.toggle('active', c === card); });
+        slideExpand.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+});
+document.getElementById('slideExpandClose').addEventListener('click', function (e) {
+    e.stopPropagation();
+    slideExpand.hidden = true;
+    slideCards.forEach(function (c) { c.classList.remove('active'); });
+});
+
+// Feature rows — one active at a time, detail shown in shared right-hand panel
+var featureRows = Array.prototype.slice.call(document.querySelectorAll('.feature-row'));
+var featureDetails = Array.prototype.slice.call(document.querySelectorAll('.feature-detail'));
+featureRows.forEach(function (row) {
+    row.addEventListener('click', function () {
+        var target = row.getAttribute('data-feature');
+        featureRows.forEach(function (r) { r.classList.toggle('active', r === row); });
+        featureDetails.forEach(function (d) { d.classList.toggle('active', d.getAttribute('data-feature') === target); });
+    });
+});
+
+// Active nav highlighting on scroll
+var sections = Array.prototype.slice.call(document.querySelectorAll('.section'));
+var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-bar a'));
+function onScroll() {
+    var pos = window.scrollY + 80;
+    var current = sections[0];
+    sections.forEach(function (s) { if (s.offsetTop <= pos) current = s; });
+    navLinks.forEach(function (a) {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current.id);
+    });
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+</script>
+
+</body>
+</html>
