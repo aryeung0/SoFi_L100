@@ -162,6 +162,8 @@ body {
 .note { background: light-dark(hsl(202,45%,95%), hsl(205,40%,14%)); border-left: 4px solid #29B5E8; color: light-dark(#0E4E68, #bfe6f6); }
 .note-green { background: light-dark(#f0fdf4, hsl(150,35%,12%)); border-left: 4px solid #22c55e; color: light-dark(#166534, #a9e6c3); }
 .note-amber { background: light-dark(#fef4e6, hsl(30,45%,12%)); border-left: 4px solid #e8912a; color: light-dark(#7a4a10, #f0c98a); }
+.btn-download { display: inline-flex; align-items: center; gap: 6px; background: #00A2C7; color: #fff; font-weight: 600; font-size: 14px; padding: 8px 16px; border-radius: 6px; text-decoration: none; margin: 4px 0 12px; }
+.btn-download:hover { background: #0089a8; }
 
 /* Tables */
 .table-wrap { overflow-x: auto; }
@@ -385,7 +387,8 @@ img { max-width: 100%; height: auto; }
 
     <div class="stop">
         <div class="stop-header"><span class="stop-num">1</span><span class="stop-title">Create a Workspace</span><span class="stop-tag tag-setup">Setup</span></div>
-        <p>Download <code>00_L100_Setup.sql</code> from the link your facilitator shares. In the left sidebar, click <strong>Projects &rarr; Workspaces</strong>, then click <strong>+</strong> and select <strong>Private workspace</strong>. Name it <strong>SoFi_L100</strong>.</p>
+        <p>Download the setup script, then in the left sidebar click <strong>Projects &rarr; Workspaces</strong>, click <strong>+</strong>, and select <strong>Private workspace</strong>. Name it <strong>SoFi_L100</strong>.</p>
+        <a class="btn-download" href="https://github.com/aryeung0/SoFi_L100/releases/download/v1.0/00_L100_Setup.sql" download>&darr; Download 00_L100_Setup.sql</a>
         <img src="assets/screenshots/00_Projects_Workspaces.png" alt="Projects and Workspaces navigation">
         <img src="assets/screenshots/01_create_workspace.png" alt="Create workspace dialog">
     </div>
