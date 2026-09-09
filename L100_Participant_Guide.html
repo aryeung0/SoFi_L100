@@ -186,6 +186,7 @@ tr.sub-row-2 td:first-child { padding-left: 54px; font-weight: 400; font-size: 1
 .stop img { max-width: 60%; border-radius: 8px; border: 1px solid light-dark(hsl(201,20%,88%), hsl(205,20%,26%)); margin-top: 10px; }
 .stop img[src$="11_CoCo.png"] { max-width: 37.5%; }
 .stop img[src$="00_Projects_Workspaces.png"],
+.stop img[src$="99_Projects_Workspaces.png"],
 .stop img[src$="06_Horizon_Catalog.png"],
 .stop img[src$="09_Database_view.png"],
 .stop img[src$="12_Cowork.png"] { max-width: 45%; }
@@ -431,7 +432,13 @@ img { max-width: 100%; height: auto; }
     <p>Your environment is built and you've toured the catalog &mdash; now put it to work with the two AI tools you'll use most. Ask CoCo to explore and query your data directly, then ask CoWork the same kinds of questions in plain English. Copy any of the sample prompts below into CoCo or CoWork as-is, or use them as a starting point for your own questions.</p>
 
     <div class="stop">
-        <div class="stop-header"><span class="stop-num">1</span><span class="stop-title">CoCo &mdash; Explore the Schema</span><span class="stop-tag tag-coco">CoCo</span></div>
+        <div class="stop-header"><span class="stop-num">1</span><span class="stop-title">Back to Your Workspace</span><span class="stop-tag tag-setup">Tour</span></div>
+        <p>In the left sidebar, click <strong>Projects &rarr; Workspaces</strong>, then open <strong>SoFi_L100</strong> to get back to your workspace.</p>
+        <img src="assets/screenshots/99_Projects_Workspaces.png" alt="Projects and Workspaces navigation">
+    </div>
+
+    <div class="stop">
+        <div class="stop-header"><span class="stop-num">2</span><span class="stop-title">CoCo &mdash; Explore the Schema</span><span class="stop-tag tag-coco">CoCo</span></div>
         <p>Back in your Workspace, notice the <strong>Databases</strong> tab &mdash; you can browse tables right there too. Click the <strong>blue star icon</strong> to open CoCo and ask your first question.</p>
         <img src="assets/screenshots/09_Database_view.png" alt="Databases tab in workspace">
         <img src="assets/screenshots/10_coco_bluesquare.png" alt="CoCo blue star icon">
@@ -444,7 +451,7 @@ img { max-width: 100%; height: auto; }
     </div>
 
     <div class="stop">
-        <div class="stop-header"><span class="stop-num">2</span><span class="stop-title">CoCo &mdash; Ask &amp; Iterate</span><span class="stop-tag tag-coco">CoCo</span></div>
+        <div class="stop-header"><span class="stop-num">3</span><span class="stop-title">CoCo &mdash; Ask &amp; Iterate</span><span class="stop-tag tag-coco">CoCo</span></div>
         <p>Type a question in the chat panel. CoCo writes the SQL, runs it, and shows results &mdash; then keeps context for follow-ups like "now break that down by department."</p>
         <img src="assets/screenshots/11_CoCo.png" alt="CoCo chat panel">
         <div class="note-green" style="margin-top:14px;"><strong>Pro tip:</strong> You can type your next prompt while CoCo is still working &mdash; it queues and auto-sends when ready.</div>
@@ -464,7 +471,7 @@ img { max-width: 100%; height: auto; }
     </div>
 
     <div class="stop">
-        <div class="stop-header"><span class="stop-num">3</span><span class="stop-title">CoWork &mdash; Ask, Chart &amp; Save</span><span class="stop-tag tag-cowork">CoWork</span></div>
+        <div class="stop-header"><span class="stop-num">4</span><span class="stop-title">CoWork &mdash; Ask, Chart &amp; Save</span><span class="stop-tag tag-cowork">CoWork</span></div>
         <p>Click <strong>AI &amp; ML &rarr; Snowflake CoWork</strong>. The Finance Assistant agent is already loaded since it's the only agent on the account &mdash; just start typing. CoWork routes your question through the Finance Assistant Cortex Agent, which queries the FINANCE_ANALYTICS semantic view.</p>
         <img src="assets/screenshots/12_Cowork.png" alt="AI and ML sidebar with Snowflake CoWork">
         <img src="assets/screenshots/13_CoWork_UI.png" alt="CoWork landing page">
